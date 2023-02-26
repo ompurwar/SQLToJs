@@ -1,6 +1,6 @@
 {
   "type": "module",
-  "name": "SQLToJs storage-layer",
+  "name": "SQLToJs-storage-layer",
   "version": "1.0.0",
   "description": "an SQL based DB with custom storage layers like (json.file,indexed db, loaclstorage)",
   "main": "index.js",
