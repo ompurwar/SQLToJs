@@ -1,0 +1,19 @@
+{
+  "type":"module",
+  "name": "SQLToJs storage-layer",
+  "version": "1.0.0",
+  "description": "an SQL based DB with custom storage layers like (json.file,indexed db, loaclstorage)",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "#jsDB"
+  ],
+  "author": "ompurwar96@gmail.com <om purwar, utkarsh pandey>",
+  "license": "ISC",
+  "dependencies": {
+    "node-sql-parser": "^4.6.5",
+    "sql-parser-cst": "^0.12.0"
+  }
+}
