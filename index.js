@@ -15,8 +15,8 @@ const parser = new ASTModule.Parser()
 function buildDbEnv(
     // statement = [{ type: 'select', logic: () => { } }],
     tables = [{ identifier: '', table: [] }],
-    functions = [{ identifier: '', logic: () => { } }], 
-    ) {
+    functions = [{ identifier: '', logic: () => { } }],
+) {
 
     let context = { tables: {}, functions: {} };
 
@@ -57,6 +57,39 @@ function executeStatement(ast, dbContext = {}, debug = false) {
         console.log(js_string);
     return eval(js_string);
 }
+
+function SUM(column = '', table = [], group_by = '') {
+
+    // console.log('[sum aggr_func called]=====',column,group_by,table)
+    // console.log(table[group_by],)
+    return table.reduce((acc, item) => {
+        acc.sum += item[column];
+        return acc;
+    }, { count: 0, sum: 0 })?.sum || 0;
+}
+function AVG(column = '', table = []) {
+    // console.log('[AVG aggr_func called]=====')
+    return table.reduce((acc, item, index, array) => {
+        acc.avg += item[column];
+
+        if (index === array.length - 1) {
+            acc.avg = acc.avg / array.length;
+        }
+        return acc;
+    }, { count: 0, avg: 0 })
+        ?.avg || 0;
+}
+function COUNT(column = '', table = []) {
+    // console.log('[sum aggr_func called]=====')
+    return table.reduce((acc, item, index, array) => {
+
+        acc.count++
+
+        return acc;
+    }, { count: 0, avg: 0 })
+        ?.count || 0;
+}
+
 // function genSelectStatement(ast) { return selectToJs(ast) }
 const opt = {
     database: 'MariaDB' // MySQL is the default database
@@ -83,6 +116,6 @@ function runSQL(SQL, env, debug = false) {
 }
 
 export {
-    buildDbEnv ,
+    buildDbEnv,
     runSQL
 }

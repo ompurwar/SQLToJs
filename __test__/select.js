@@ -67,10 +67,79 @@ export default (env) => {
 
     ]);
     // TODO: create a test for group by it 'there seems to be a bug in the in the process' FIX group by
+    assert.deepEqual(runSQL(`SELECT category,price From products where price < 50 group by category limit 3 `, env, debug), [
+        { category: 'Accessories', price: 49.99 },
+        { category: 'Fitness Equipment', price: 49.99 },
+        { category: 'Clothing', price: 19.99 }
+        // { "name": "Backpack", "category": "Accessories", "price": 49.99, "manufacturer": "Herschel", "description": "A sturdy and stylish backpack from Herschel, great for school or travel.", "Accessories": [{ "name": "Backpack", "category": "Accessories", "price": 49.99, "manufacturer": "Herschel", "description": "A sturdy and stylish backpack from Herschel, great for school or travel." }] },
+
+        // { "name": "Dumbbells", "category": "Fitness Equipment", "price": 49.99, "manufacturer": "Bowflex", "description": "A set of adjustable dumbbells from Bowflex, great for home workouts.", "Fitness Equipment": [{ "name": "Dumbbells", "category": "Fitness Equipment", "price": 49.99, "manufacturer": "Bowflex", "description": "A set of adjustable dumbbells from Bowflex, great for home workouts." }] },
+
+        // { "name": "T-Shirt", "category": "Clothing", "price": 19.99, "manufacturer": "Uniqlo", "description": "A soft and comfortable t-shirt from Uniqlo, available in various colors and sizes.", "Clothing": [{ "name": "T-Shirt", "category": "Clothing", "price": 19.99, "manufacturer": "Uniqlo", "description": "A soft and comfortable t-shirt from Uniqlo, available in various colors and sizes." }] },
+
+    ]);
+    assert.deepEqual(runSQL(`SELECT category,price From products where price < 50 group by price limit 3 `, env, debug), [
+        { category: 'Accessories', price: 49.99 },
+        // { category: 'Fitness Equipment', price: 49.99 },
+        { category: 'Clothing', price: 19.99 }
+        // { "name": "Backpack", "category": "Accessories", "price": 49.99, "manufacturer": "Herschel", "description": "A sturdy and stylish backpack from Herschel, great for school or travel.", "Accessories": [{ "name": "Backpack", "category": "Accessories", "price": 49.99, "manufacturer": "Herschel", "description": "A sturdy and stylish backpack from Herschel, great for school or travel." }] },
+
+        // { "name": "Dumbbells", "category": "Fitness Equipment", "price": 49.99, "manufacturer": "Bowflex", "description": "A set of adjustable dumbbells from Bowflex, great for home workouts.", "Fitness Equipment": [{ "name": "Dumbbells", "category": "Fitness Equipment", "price": 49.99, "manufacturer": "Bowflex", "description": "A set of adjustable dumbbells from Bowflex, great for home workouts." }] },
+
+        // { "name": "T-Shirt", "category": "Clothing", "price": 19.99, "manufacturer": "Uniqlo", "description": "A soft and comfortable t-shirt from Uniqlo, available in various colors and sizes.", "Clothing": [{ "name": "T-Shirt", "category": "Clothing", "price": 19.99, "manufacturer": "Uniqlo", "description": "A soft and comfortable t-shirt from Uniqlo, available in various colors and sizes." }] },
+
+    ]);
     // TODO: create test and implement support for following aggregation functions
     // TODO:  1: create test and implement support for AVG()
+    assert.deepEqual(runSQL(`SELECT category,price,SUM(price),AVG(price),COUNT(0) From products where category = 'Electronics' group by category  `, env, debug), [
+        {
+            category: 'Electronics',
+            price: 599.99,
+            'SUM(price)': 3649.95,
+            'AVG(price)':  608.3249999999999,
+            'COUNT(0)': 6
+        },
+        // { category: 'Fitness Equipment', price: 49.99 },
+        // { category: 'Clothing', price: 19.99 }
+        // { "name": "Backpack", "category": "Accessories", "price": 49.99, "manufacturer": "Herschel", "description": "A sturdy and stylish backpack from Herschel, great for school or travel.", "Accessories": [{ "name": "Backpack", "category": "Accessories", "price": 49.99, "manufacturer": "Herschel", "description": "A sturdy and stylish backpack from Herschel, great for school or travel." }] },
+
+        // { "name": "Dumbbells", "category": "Fitness Equipment", "price": 49.99, "manufacturer": "Bowflex", "description": "A set of adjustable dumbbells from Bowflex, great for home workouts.", "Fitness Equipment": [{ "name": "Dumbbells", "category": "Fitness Equipment", "price": 49.99, "manufacturer": "Bowflex", "description": "A set of adjustable dumbbells from Bowflex, great for home workouts." }] },
+
+        // { "name": "T-Shirt", "category": "Clothing", "price": 19.99, "manufacturer": "Uniqlo", "description": "A soft and comfortable t-shirt from Uniqlo, available in various colors and sizes.", "Clothing": [{ "name": "T-Shirt", "category": "Clothing", "price": 19.99, "manufacturer": "Uniqlo", "description": "A soft and comfortable t-shirt from Uniqlo, available in various colors and sizes." }] },
+
+    ]);
     // TODO:  2: create test and implement support for COUNT()
     // TODO:  3: create test and implement support for SUM()
+    assert.deepEqual(runSQL(`SELECT category,price,SUM(price) From products group by category`, env, debug), [
+        { category: 'Electronics', price: 599.99, 'SUM(price)': 3649.95 },
+        { category: 'Footwear', price: 89.99, 'SUM(price)': 89.99 },
+        { category: 'Accessories', price: 49.99, 'SUM(price)': 49.99 },
+        {
+            category: 'Kitchen Appliances',
+            price: 79.99,
+            'SUM(price)': 79.99
+        },
+        {
+            category: 'Fitness Equipment',
+            price: 49.99,
+            'SUM(price)': 49.99
+        },
+        {
+            category: 'Gaming Accessories',
+            price: 69.99,
+            'SUM(price)': 69.99
+        },
+        {
+            category: 'Home Appliances',
+            price: 199.99,
+            'SUM(price)': 199.99
+        },
+        { category: 'Clothing', price: 19.99, 'SUM(price)': 19.99 }
+    ]);
+    assert.deepEqual(runSQL(`SELECT category,price,SUM(price) From products where (category = 'Electronics') OR (category ='Footwear') group by category`, env, debug), [
+        { category: 'Electronics', price: 599.99, 'SUM(price)': 3649.95 },
+        { category: 'Footwear', price: 89.99, 'SUM(price)': 89.99 },
+    ]);
     // TODO:  4: create test and implement support for MAX()
     // TODO:  4: create test and implement support for MIN()
     // TODO IMPLEMENT test for following operators '+' | '-' | '*' | '/' | '%' | '=' | '<>' | '>' | '<' | '>=' | '<=' | 'LIKE' | 'IN' | 'NOT IN' | 'IS NULL' | 'IS NOT NULL' | 'AND' | 'OR' | 'NOT'
@@ -94,3 +163,5 @@ export default (env) => {
 
 
 }
+
+
