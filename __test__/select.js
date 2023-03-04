@@ -51,11 +51,11 @@ export default (env) => {
     ]);
     assert.deepEqual(runSQL(`SELECT * From products where price = 49.99 AND manufacturer = 'Herschel' limit 2 `, env, debug), [
 
-        { "name": "Backpack", "category": "Accessories", "price": 49.99, "manufacturer": "Herschel", "description": "A sturdy and stylish backpack from Herschel, great for school or travel." }
+        { id: 5, "name": "Backpack", "category": "Accessories", "price": 49.99, "manufacturer": "Herschel", "description": "A sturdy and stylish backpack from Herschel, great for school or travel." }
 
     ]);
     assert.deepEqual(runSQL(`SELECT * From products where (price BETWEEN 30 AND 50) AND manufacturer = 'Herschel' limit 2 `, env, debug), [
-        { "name": "Backpack", "category": "Accessories", "price": 49.99, "manufacturer": "Herschel", "description": "A sturdy and stylish backpack from Herschel, great for school or travel." }
+        { id: 5, "name": "Backpack", "category": "Accessories", "price": 49.99, "manufacturer": "Herschel", "description": "A sturdy and stylish backpack from Herschel, great for school or travel." }
 
     ]);
     // TODO: create a test for group by it 'there seems to be a bug in the in the process' FIX group by
@@ -149,6 +149,39 @@ export default (env) => {
     // TODO: IMPLEMENT given scalar functions <scalar_function> -> UCASE '(' <identifier> ')' | LCASE '(' <identifier> ')' | MID '(' <identifier> ',' <integer> ',' <integer> ')' | LEN '(' <identifier> ')' | ROUND '(' <identifier> ',' <integer> ')' | NOW '(' ')' | FORMAT '(' <identifier> ',' <integer> ')'
     // TODO: IMPLEMENT HEAVING BY clause
     // TODO: IMPLEMENT ORDER BY clause
+
+    // order by desc
+    assert.deepStrictEqual(runSQL(`SELECT  * From (select price from products) Order by price DESC`, env, debug), [
+        { price: 1299.99 },
+        { price: 799.99 },
+        { price: 600 },
+        { price: 599.99 },
+        { price: 199.99 },
+        { price: 199.99 },
+        { price: 149.99 },
+        { price: 89.99 },
+        { price: 79.99 },
+        { price: 69.99 },
+        { price: 49.99 },
+        { price: 49.99 },
+        { price: 19.99 },
+
+    ]);
+
+    //  multi column
+    const employees = [
+        { firstName: 'John', lastName: 'Doe', salary: 5000 },
+        { firstName: 'Jane', lastName: 'Doe', salary: 6000 },
+        { firstName: 'Jim', lastName: 'Brown', salary: 5500 },
+        { firstName: 'Jake', lastName: 'Blues', salary: 6500 }
+    ];
+    const employees_env = buildDbEnv([{ identifier: 'employees', table: employees }]);
+    assert.deepStrictEqual(
+        runSQL(`SELECT * FROM employees ORDER BY lastName ASC, firstName ASC`, employees_env, debug),
+        [{ "firstName": "Jake", "lastName": "Blues", "salary": 6500 },
+        { "firstName": "Jim", "lastName": "Brown", "salary": 5500 },
+        { "firstName": "Jane", "lastName": "Doe", "salary": 6000 },
+        { "firstName": "John", "lastName": "Doe", "salary": 5000 }]);
     // TODO: IMPLEMENT SQL UNION clause
     // TODO: IMPLEMENT INTERSECT clause
     // TODO: IMPLEMENT SUPPORT JOINS
