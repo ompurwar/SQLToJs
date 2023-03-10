@@ -1,6 +1,8 @@
 import { orders, payments, products, users } from '../data.js';
 import { buildDbEnv } from '../index.js';
 import select from './select.js'
+import clauses from './caluses.js';
+
 const tables = [
     { identifier: 'products', table: products },
 
@@ -12,6 +14,7 @@ const functions = [];
 
 
 const tests = [
+    clauses,
     select
 ];
 

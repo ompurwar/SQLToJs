@@ -1,8 +1,9 @@
 
 import ASTModule from 'node-sql-parser';
 import { products, users } from './data.js';
-import { exprToJs } from './lib/sqlExpr.js';
+import { exprToJs, sqlOperatorTOJs } from './lib/sqlExpr.js';
 import { ilikeToRegExp } from './lib/sqlLike.js';
+import { traverseObj } from './utils/traverseObj.js';
 const parser = new ASTModule.Parser()
 
 // opt is optional
@@ -51,13 +52,152 @@ function executeAst(ast = {}, dbContext) {
 
 function executeStatement(ast, dbContext = {}, debug = false) {
     let js_string = exprToJs(ast);
-    const context = dbContext;
+    const context = (global || window).context = dbContext;
     // console.log(context.tables)
     if (debug) {
         console.log(js_string);
-        // console.log(JSON.stringify(ast, null, 2))
+        console.log(JSON.stringify(ast, null, 2));
     }
+
+
+
     return eval(js_string);
+}
+function JOIN(table1 = [], table2 = [], joinObj = {
+    "type": "binary_expr",
+    "operator": "=",
+    "left": {
+        "type": "column_ref",
+        "table": "orders",
+        "column": "id"
+    },
+    "right": {
+        "type": "column_ref",
+        "table": "payments",
+        "column": "order_id"
+    }
+}) {
+
+    const { table, join, as, on } = joinObj;
+    let left_table = table1;
+    let right_table = table2;
+
+    const joinConditionJs = joinCOnditionTOJs(joinObj);
+    // console.log(joinConditionJs, table, as);
+    // console.log(left_table, right_table,table)
+    let data = []
+    switch (join) {
+        case 'INNER JOIN':
+            left_table.forEach((left, index, left_table) => {
+                const matchFOund = right_table.filter((right) => eval(joinConditionJs));
+
+                if (matchFOund?.length) {
+                    matchFOund.forEach((_) => {
+
+                        // console.log(data)
+                        let obj = { ...left };
+                        for (const key in _) {
+                            if (Object.hasOwnProperty.call(_, key)) {
+                                const element = _[key];
+                                obj[`${table || as}.${key}`] = element;
+                                // console.log(obj)
+                            }
+                        }
+                        data?.push(obj)
+
+
+                    })
+                }
+
+
+                // console.log(left, matchFOund)
+            });
+
+            break;
+
+        case 'LEFT JOIN':
+            // console.log(right_table)
+            left_table.forEach((left, index, left_table) => {
+                const matchFOund = right_table.filter((right) => eval(joinConditionJs));
+
+                let obj = { ...left };
+                // console.log(matchFOund)
+                if (matchFOund?.length) {
+                    matchFOund.forEach((_) => {
+
+                        // console.log(data)
+                        for (const key in _) {
+                            if (Object.hasOwnProperty.call(_, key)) {
+                                const element = _[key];
+                                obj[`${table || as}.${key}`] = element;
+                                // console.log(obj)
+                            }
+                        }
+
+
+                    })
+                }
+                data?.push(obj)
+
+
+                // console.log(left, matchFOund)
+            });
+
+            break;
+
+        case 'RIGHT JOIN':
+            // console.log(right_table)
+            right_table.forEach((right, index, right_table) => {
+                const matchFOund = left_table.filter((left) => eval(joinConditionJs));
+
+                let obj = { ...right };
+                // console.log(matchFOund)
+                if (matchFOund?.length) {
+                    matchFOund.forEach((_) => {
+
+                        // console.log(data)
+                        for (const key in _) {
+                            if (Object.hasOwnProperty.call(_, key)) {
+                                const element = _[key];
+                                obj[`${table || as}.${key}`] = element;
+                                // console.log(obj)
+                            }
+                        }
+
+
+                    })
+                }
+                data?.push(obj)
+
+
+                // console.log(left, matchFOund)
+            });
+
+            break;
+
+        default:
+            break;
+    }
+
+    console.table(data);
+    return data
+}
+
+
+function joinCOnditionTOJs(joinObj) {
+    const { table, join, as, on } = joinObj;
+    // console.log(table,right_table,on)
+    traverseObj(on, (elem, key) => {
+        if (key === 'table') {
+            return true;
+        }
+    }, (elem) => {
+        if (elem === table) return 'right'
+        else return 'left'
+    });
+    return `((left,right)=>{
+        // console.log(left.id,right.user_id);
+        return ${exprToJs(on)}})(left,right)`;
 }
 
 function SUM(distinct, column = '', table = [], group_by = '') {
@@ -70,7 +210,7 @@ function SUM(distinct, column = '', table = [], group_by = '') {
     }, { count: 0, sum: 0 })?.sum || 0;
 }
 function AVG(distinct, column = '', table = []) {
-    console.log('[AVG aggr_func called]=====', distinct)
+    // console.log('[AVG aggr_func called]=====', distinct)
     return table.reduce((acc, item, index, array) => {
 
         if (distinct) {
@@ -137,7 +277,7 @@ function COUNT(distinct, column = '', table = []) {
         ?.count || 0;
 }
 function MAX(distinct, column = '', table = []) {
-    // console.log('[sum aggr_func called]=====',column,table)
+    // console.log('[MAX aggr_func called]=====',column,table)
     return table.reduce((max, item, index, array) => {
 
         if (item[column] > max) max = item[column];
@@ -181,7 +321,8 @@ function runSQL(SQL, env, debug = false) {
     return executeStatement(ast, env, debug)
 }
 
+
 export {
     buildDbEnv,
-    runSQL
+    runSQL, JOIN
 }

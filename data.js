@@ -24,7 +24,9 @@ const users = [
     { id: 8, budget: 849, name: 'User 8', marks: 55 },
     { id: 9, budget: 756, name: 'User 9', marks: 72 },
     { id: 10, budget: 502, name: 'User 10', marks: 95 },
+    { id: 11, budget: 502, name: 'User 11', marks: 95 },
 ];
+
 // Order table
 const orders = [
     { id: 1, user_id: 5, product_id: 1, quantity: 1 },

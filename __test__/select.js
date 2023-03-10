@@ -1,7 +1,8 @@
 
 import assert from 'assert';
 import { products, users } from '../data.js';
-import { runSQL, buildDbEnv } from '../index.js';
+import { runSQL, buildDbEnv, JOIN } from '../index.js';
+
 
 const tables = [
     { identifier: 'products', table: products.slice(0, 3) },
@@ -206,10 +207,286 @@ export default (env) => {
         { "firstName": "Jim", "lastName": "Brown", "salary": 5500 },
         { "firstName": "Jane", "lastName": "Doe", "salary": 6000 },
         { "firstName": "John", "lastName": "Doe", "salary": 5000 }]);
+    // assert.deepStrictEqual(
+    //     runSQL(`SELECT *
+    //     FROM orders o
+    //     JOIN customers c ON o.customer_id = c.customer_id
+    //     JOIN order_items oi ON o.order_id = oi.order_id
+    //         AND oi.order_item_date > '2022-01-01'`, employees_env, debug),
+    //     [{ "firstName": "Jake", "lastName": "Blues", "salary": 6500 },
+    //     { "firstName": "Jim", "lastName": "Brown", "salary": 5500 },
+    //     { "firstName": "Jane", "lastName": "Doe", "salary": 6000 },
+    //     { "firstName": "John", "lastName": "Doe", "salary": 5000 }]);
     // TODO: IMPLEMENT SQL UNION clause
     // TODO: IMPLEMENT INTERSECT clause
     // TODO: IMPLEMENT SUPPORT JOINS
     // SQL INNER JOIN
+
+    assert.deepStrictEqual(runSQL(`
+    SELECT *
+    FROM (select * from orders where quantity=1 )
+    INNER JOIN payments ON payments.order_id = orders.id and payments.status = 'Paid'
+    INNER JOIN users ON orders.user_id=users.id AND orders.id between 1 AND 6
+    JOIN products ON products.id = orders.product_id `, env, debug),
+        [
+            {
+                id: 1,
+                user_id: 5,
+                product_id: 1,
+                quantity: 1,
+                'payments.id': 1,
+                'payments.order_id': 1,
+                'payments.amount': 599.99,
+                'payments.payment_method': 'Credit Card',
+                'payments.status': 'Paid',
+                'users.id': 5,
+                'users.budget': 904,
+                'users.name': 'User 5',
+                'users.marks': 77,
+                'products.id': 1,
+                'products.name': 'Smartphone',
+                'products.category': 'Electronics',
+                'products.price': 599.99,
+                'products.manufacturer': 'Samsung',
+                'products.description': 'The latest smartphone from Samsung with a 6.5 inch OLED display and 5G connectivity.'
+            },
+            {
+                id: 3,
+                user_id: 9,
+                product_id: 8,
+                quantity: 1,
+                'payments.id': 3,
+                'payments.order_id': 3,
+                'payments.amount': 69.99,
+                'payments.payment_method': 'Apple Pay',
+                'payments.status': 'Paid',
+                'users.id': 9,
+                'users.budget': 756,
+                'users.name': 'User 9',
+                'users.marks': 72,
+                'products.id': 8,
+                'products.name': 'Gaming Mouse',
+                'products.category': 'Gaming Accessories',
+                'products.price': 69.99,
+                'products.manufacturer': 'Logitech',
+                'products.description': 'A high-performance gaming mouse from Logitech with customizable RGB lighting.'
+            },
+            {
+                id: 5,
+                user_id: 10,
+                product_id: 2,
+                quantity: 1,
+                'payments.id': 5,
+                'payments.order_id': 5,
+                'payments.amount': 1299.99,
+                'payments.payment_method': 'Credit Card',
+                'payments.status': 'Paid',
+                'users.id': 10,
+                'users.budget': 502,
+                'users.name': 'User 10',
+                'users.marks': 95,
+                'products.id': 2,
+                'products.name': 'Laptop',
+                'products.category': 'Electronics',
+                'products.price': 1299.99,
+                'products.manufacturer': 'Apple',
+                'products.description': 'A powerful laptop from Apple with a 13 inch Retina display and an M1 chip.'
+            }
+
+
+        ]);
+    // LEFT JOIN
+
+    assert.deepStrictEqual(runSQL(`
+        SELECT *
+        FROM users
+        left JOIN orders ON orders.user_id = users.id`, env, debug),
+        [
+            {
+                id: 1,
+                budget: 564,
+                name: 'User 1',
+                marks: 85,
+                'orders.id': 6,
+                'orders.user_id': 1,
+                'orders.product_id': 6,
+                'orders.quantity': 1
+            },
+            {
+                id: 2,
+                budget: 319,
+                name: 'User 2',
+                marks: 47,
+                'orders.id': 2,
+                'orders.user_id': 2,
+                'orders.product_id': 3,
+                'orders.quantity': 2
+            },
+            {
+                id: 3,
+                budget: 713,
+                name: 'User 3',
+                marks: 92,
+                'orders.id': 8,
+                'orders.user_id': 3,
+                'orders.product_id': 12,
+                'orders.quantity': 1
+            },
+            {
+                id: 4,
+                budget: 498,
+                name: 'User 4',
+                marks: 60,
+                'orders.id': 4,
+                'orders.user_id': 4,
+                'orders.product_id': 5,
+                'orders.quantity': 3
+            },
+            {
+                id: 5,
+                budget: 904,
+                name: 'User 5',
+                marks: 77,
+                'orders.id': 1,
+                'orders.user_id': 5,
+                'orders.product_id': 1,
+                'orders.quantity': 1
+            },
+            {
+                id: 6,
+                budget: 268,
+                name: 'User 6',
+                marks: 34,
+                'orders.id': 10,
+                'orders.user_id': 6,
+                'orders.product_id': 4,
+                'orders.quantity': 1
+            },
+            {
+                id: 7,
+                budget: 138,
+                name: 'User 7',
+                marks: 89,
+                'orders.id': 7,
+                'orders.user_id': 7,
+                'orders.product_id': 10,
+                'orders.quantity': 2
+            },
+            {
+                id: 8,
+                budget: 849,
+                name: 'User 8',
+                marks: 55,
+                'orders.id': 9,
+                'orders.user_id': 8,
+                'orders.product_id': 9,
+                'orders.quantity': 1
+            },
+            {
+                id: 9,
+                budget: 756,
+                name: 'User 9',
+                marks: 72,
+                'orders.id': 3,
+                'orders.user_id': 9,
+                'orders.product_id': 8,
+                'orders.quantity': 1
+            },
+            {
+                id: 10,
+                budget: 502,
+                name: 'User 10',
+                marks: 95,
+                'orders.id': 5,
+                'orders.user_id': 10,
+                'orders.product_id': 2,
+                'orders.quantity': 1
+            },
+            { id: 11, budget: 502, name: 'User 11', marks: 95 }
+        ]);
+    // LEFT AND right join
+    assert.deepStrictEqual(runSQL(`
+        SELECT id,orders.product_id,payments.amount,payments.status,name,orders.quantity
+        FROM users
+        left JOIN orders ON orders.user_id = users.id 
+        INNER JOIN payments ON payments.order_id = orders.id and payments.status = 'Paid' `, env, debug),
+        [
+            {
+                id: 1,
+                'orders.product_id': 6,
+                'payments.amount': 599.99,
+                'payments.status': 'Paid',
+                name: 'User 1',
+                'orders.quantity': 1
+            },
+            {
+                id: 2,
+                'orders.product_id': 3,
+                'payments.amount': 399.98,
+                'payments.status': 'Paid',
+                name: 'User 2',
+                'orders.quantity': 2
+            },
+            {
+                id: 3,
+                'orders.product_id': 12,
+                'payments.amount': 69.99,
+                'payments.status': 'Paid',
+                name: 'User 3',
+                'orders.quantity': 1
+            },
+            {
+                id: 4,
+                'orders.product_id': 5,
+                'payments.amount': 269.97,
+                'payments.status': 'Paid',
+                name: 'User 4',
+                'orders.quantity': 3
+            },
+            {
+                id: 5,
+                'orders.product_id': 1,
+                'payments.amount': 1299.99,
+                'payments.status': 'Paid',
+                name: 'User 5',
+                'orders.quantity': 1
+            },
+            {
+                id: 6,
+                'orders.product_id': 4,
+                'payments.amount': 79.99,
+                'payments.status': 'Paid',
+                name: 'User 6',
+                'orders.quantity': 1
+            },
+            {
+                id: 10,
+                'orders.product_id': 2,
+                'payments.amount': 89.99,
+                'payments.status': 'Paid',
+                name: 'User 10',
+                'orders.quantity': 1
+            }
+        ]);
+    // RIGHT JOIN
+    assert.deepStrictEqual(runSQL(`
+        SELECT amount  , payment_method 
+        FROM orders b
+        RIGHT JOIN payments ON payments.order_id = orders.id and payments.status = 'Paid' `, env, debug),
+        [
+            { amount: 599.99, payment_method: 'Credit Card' },
+            { amount: 399.98, payment_method: 'PayPal' },
+            { amount: 69.99, payment_method: 'Apple Pay' },
+            { amount: 269.97, payment_method: 'Google Pay' },
+            { amount: 1299.99, payment_method: 'Credit Card' },
+            { amount: 79.99, payment_method: 'Credit Card' },
+            { amount: 399.98, payment_method: 'PayPal' },
+            { amount: 600, payment_method: 'Credit Card' },
+            { amount: 149.99, payment_method: 'Credit Card' },
+            { amount: 89.99, payment_method: 'Credit Card' }
+        ]);
+
+ 
     // SQL LEFT JOIN
     // SQL SELF JOIN
     // SQL FULL OUTER JOIN
