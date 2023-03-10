@@ -413,60 +413,82 @@ export default (env) => {
         [
             {
                 id: 1,
-                'orders.product_id': 6,
-                'payments.amount': 599.99,
-                'payments.status': 'Paid',
+                'product_id': 6,
+                'amount': 599.99,
+                'status': 'Paid',
                 name: 'User 1',
-                'orders.quantity': 1
+                'quantity': 1
             },
             {
                 id: 2,
-                'orders.product_id': 3,
-                'payments.amount': 399.98,
-                'payments.status': 'Paid',
+                'product_id': 3,
+                'amount': 399.98,
+                'status': 'Paid',
                 name: 'User 2',
-                'orders.quantity': 2
+                'quantity': 2
             },
             {
                 id: 3,
-                'orders.product_id': 12,
-                'payments.amount': 69.99,
-                'payments.status': 'Paid',
+                'product_id': 12,
+                'amount': 69.99,
+                'status': 'Paid',
                 name: 'User 3',
-                'orders.quantity': 1
+                'quantity': 1
             },
             {
                 id: 4,
-                'orders.product_id': 5,
-                'payments.amount': 269.97,
-                'payments.status': 'Paid',
+                'product_id': 5,
+                'amount': 269.97,
+                'status': 'Paid',
                 name: 'User 4',
-                'orders.quantity': 3
+                'quantity': 3
             },
             {
                 id: 5,
-                'orders.product_id': 1,
-                'payments.amount': 1299.99,
-                'payments.status': 'Paid',
+                'product_id': 1,
+                'amount': 1299.99,
+                'status': 'Paid',
                 name: 'User 5',
-                'orders.quantity': 1
+                'quantity': 1
             },
             {
                 id: 6,
-                'orders.product_id': 4,
-                'payments.amount': 79.99,
-                'payments.status': 'Paid',
+                'product_id': 4,
+                'amount': 79.99,
+                'status': 'Paid',
                 name: 'User 6',
-                'orders.quantity': 1
+                'quantity': 1
             },
             {
                 id: 10,
-                'orders.product_id': 2,
-                'payments.amount': 89.99,
-                'payments.status': 'Paid',
+                'product_id': 2,
+                'amount': 89.99,
+                'status': 'Paid',
                 name: 'User 10',
-                'orders.quantity': 1
+                'quantity': 1
             }
+        ]);
+    assert.deepStrictEqual(runSQL(`
+        SELECT id user_id,
+               b.product_id,
+               payments.amount product_id, # product_id alias will be ignored since  b.product_id will already be converted to product_id
+               payments.status,
+               name,
+               b.quantity as om,
+               AVG(b.quantity) as avg_quantity
+        FROM users
+        left JOIN orders b ON orders.user_id = users.id 
+        INNER JOIN payments ON payments.order_id = orders.id and payments.status = 'Paid' `, env, debug),
+        [
+            {
+                user_id: 1,
+                product_id: 6, 
+                'payments.amount': 599.99,  // product_id alias will be ignored since  b.product_id will already be converted to product_id
+                status: 'Paid',
+                name: 'User 1',
+                om: 1,
+                avg_quantity: 1.4285714285714286
+              }
         ]);
     // RIGHT JOIN
     assert.deepStrictEqual(runSQL(`

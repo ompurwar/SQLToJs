@@ -99,7 +99,7 @@ function JOIN(table1 = [], table2 = [], joinObj = {
                         for (const key in _) {
                             if (Object.hasOwnProperty.call(_, key)) {
                                 const element = _[key];
-                                obj[`${table || as}.${key}`] = element;
+                                obj[`${as || table}.${key}`] = element;
                                 // console.log(obj)
                             }
                         }
@@ -121,7 +121,7 @@ function JOIN(table1 = [], table2 = [], joinObj = {
                 const matchFOund = right_table.filter((right) => eval(joinConditionJs));
 
                 let obj = { ...left };
-                // console.log(matchFOund)
+                // console.log(joinConditionJs,left)
                 if (matchFOund?.length) {
                     matchFOund.forEach((_) => {
 
@@ -129,7 +129,7 @@ function JOIN(table1 = [], table2 = [], joinObj = {
                         for (const key in _) {
                             if (Object.hasOwnProperty.call(_, key)) {
                                 const element = _[key];
-                                obj[`${table || as}.${key}`] = element;
+                                obj[`${as || table}.${key}`] = element;
                                 // console.log(obj)
                             }
                         }
@@ -159,7 +159,7 @@ function JOIN(table1 = [], table2 = [], joinObj = {
                         for (const key in _) {
                             if (Object.hasOwnProperty.call(_, key)) {
                                 const element = _[key];
-                                obj[`${table || as}.${key}`] = element;
+                                obj[`${as || table}.${key}`] = element;
                                 // console.log(obj)
                             }
                         }
@@ -179,7 +179,7 @@ function JOIN(table1 = [], table2 = [], joinObj = {
             break;
     }
 
-    console.table(data);
+    // console.table(data.slice(0,10));
     return data
 }
 
@@ -192,11 +192,10 @@ function joinCOnditionTOJs(joinObj) {
             return true;
         }
     }, (elem) => {
-        if (elem === table) return 'right'
+        if ([table,as].includes(elem) ) return 'right'
         else return 'left'
     });
     return `((left,right)=>{
-        // console.log(left.id,right.user_id);
         return ${exprToJs(on)}})(left,right)`;
 }
 
