@@ -31,8 +31,10 @@ export default async () => {
         { identifier: 'album', table: await getAlbum() },
     ]
     const env = buildDbEnv(tables, []);
+
+    // list the users, todos with theirs status and posted photos.
     let result = runSQL(`
-    Select id,username,email,todo.title todo, todo.completed completed,album.thumbnailUrl thumbnailUrl
+    Select id user_id,username,email,todo.title todo, todo.completed completed,album.thumbnailUrl thumbnailUrl
     from users as u
     LEFT JOIN todos as todo on todo.userId = users.id
     LEFT JOIN (Select photos.thumbnailUrl ,userId
@@ -41,7 +43,7 @@ export default async () => {
  `, env, debug);
     console.table(result)
     assert.deepStrictEqual(result, [{
-        id: 1,
+        user_id: 1,
         username: 'Bret',
         email: 'Sincere@april.biz',
         todo: 'ullam nobis libero sapiente ad optio sint',
@@ -49,7 +51,7 @@ export default async () => {
         thumbnailUrl: 'https://via.placeholder.com/150/324309'
     },
     {
-        id: 2,
+        user_id: 2,
         username: 'Antonette',
         email: 'Shanna@melissa.tv',
         todo: 'totam atque quo nesciunt',
@@ -57,7 +59,7 @@ export default async () => {
         thumbnailUrl: 'https://via.placeholder.com/150/fab5da'
     },
     {
-        id: 3,
+        user_id: 3,
         username: 'Samantha',
         email: 'Nathan@yesenia.net',
         todo: 'et sequi qui architecto ut adipisci',
@@ -65,7 +67,7 @@ export default async () => {
         thumbnailUrl: 'https://via.placeholder.com/150/bbf2ae'
     },
     {
-        id: 4,
+        user_id: 4,
         username: 'Karianne',
         email: 'Julianne.OConner@kory.org',
         todo: 'tempore molestias dolores rerum sequi voluptates ipsum consequatur',
@@ -73,7 +75,7 @@ export default async () => {
         thumbnailUrl: 'https://via.placeholder.com/150/1ce103'
     },
     {
-        id: 5,
+        user_id: 5,
         username: 'Kamren',
         email: 'Lucio_Hettinger@annie.ca',
         todo: 'excepturi a et neque qui expedita vel voluptate',
@@ -81,7 +83,7 @@ export default async () => {
         thumbnailUrl: 'https://via.placeholder.com/150/b5f414'
     },
     {
-        id: 6,
+        user_id: 6,
         username: 'Leopoldo_Corkery',
         email: 'Karley_Dach@jasper.info',
         todo: 'dolorem laboriosam vel voluptas et aliquam quasi',
@@ -89,7 +91,7 @@ export default async () => {
         thumbnailUrl: 'https://via.placeholder.com/150/85939d'
     },
     {
-        id: 7,
+        user_id: 7,
         username: 'Elwyn.Skiles',
         email: 'Telly.Hoeger@billy.biz',
         todo: 'aut consectetur in blanditiis deserunt quia sed laboriosam',
@@ -97,7 +99,7 @@ export default async () => {
         thumbnailUrl: 'https://via.placeholder.com/150/1fb0be'
     },
     {
-        id: 8,
+        user_id: 8,
         username: 'Maxime_Nienow',
         email: 'Sherwood@rosamond.me',
         todo: 'et praesentium aliquam est',
@@ -105,7 +107,7 @@ export default async () => {
         thumbnailUrl: 'https://via.placeholder.com/150/8cf664'
     },
     {
-        id: 9,
+        user_id: 9,
         username: 'Delphine',
         email: 'Chaim_McDermott@dana.io',
         todo: 'debitis nisi et dolorem repellat et',
@@ -113,7 +115,7 @@ export default async () => {
         thumbnailUrl: 'https://via.placeholder.com/150/5dabd6'
     },
     {
-        id: 10,
+        user_id: 10,
         username: 'Moriah.Stanton',
         email: 'Rey.Padberg@karina.biz',
         todo: 'ipsam aperiam voluptates qui',
